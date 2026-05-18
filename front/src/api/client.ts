@@ -39,6 +39,17 @@ export async function registerUser(input: {
   return payload.user;
 }
 
+export async function validateUser(input: {
+  username: string;
+  role: string;
+}): Promise<UserRecord> {
+  const payload = await request<{ user: UserRecord }>("/validate_user", {
+    method: "POST",
+    body: JSON.stringify(input),
+  });
+  return payload.user;
+}
+
 export function askQuestion(
   input: { username: string; message: string },
   signal?: AbortSignal,

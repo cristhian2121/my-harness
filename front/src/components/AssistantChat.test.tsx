@@ -86,8 +86,18 @@ describe("AssistantChat", () => {
 
   beforeEach(() => {
     vi.mocked(askQuestion)
-      .mockResolvedValueOnce({ response: "Respuesta 1" })
-      .mockResolvedValueOnce({ response: "Respuesta 2" });
+      .mockResolvedValueOnce({
+        username: "ana",
+        message: "Primera linea\nSegunda linea\nTercera linea",
+        response: "Respuesta 1",
+        status: "answered",
+      })
+      .mockResolvedValueOnce({
+        username: "ana",
+        message: "Cuarta linea\nQuinta linea",
+        response: "Respuesta 2",
+        status: "answered",
+      });
   });
 
   it("resets composer height after multiple submitted questions", async () => {

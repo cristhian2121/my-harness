@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app.application.exceptions import (
     AgentUnavailableError,
+    InvalidUserCredentialsError,
     UnsafePromptError,
     UserAlreadyExistsError,
     UserNotFoundError,
@@ -14,6 +15,7 @@ from app.application.use_cases import (
     GetHistoryUseCase,
     HealthUseCase,
     InitUserUseCase,
+    ValidateUserUseCase,
 )
 from app.core.container import AppContainer
 from app.entrypoints.api.dependencies import get_container, get_db_session
@@ -27,6 +29,8 @@ from app.entrypoints.api.schemas import (
     InitUserRequest,
     InitUserResponse,
     UserResponse,
+    ValidateUserRequest,
+    ValidateUserResponse,
 )
 from app.infrastructure.repositories import (
     SqlAlchemyChatRepository,
@@ -57,6 +61,33 @@ def init_user(
 
     return InitUserResponse(
         message="User created successfully.",
+        user=UserResponse(
+            username=user.username,
+            role=user.role,
+            created_at=user.created_at,
+        ),
+    )
+
+
+@router.post(
+    "/validate_user",
+    response_model=ValidateUserResponse,
+    responses={
+        404: {"model": ErrorResponse, "description": "Username and role do not match."},
+    },
+)
+def validate_user(
+    payload: ValidateUserRequest,
+    session: Session = Depends(get_db_session),
+) -> ValidateUserResponse:
+    use_case = ValidateUserUseCase(SqlAlchemyUserRepository(session))
+    try:
+        user = use_case.execute(username=payload.username, role=payload.role)
+    except InvalidUserCredentialsError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc)) from exc
+
+    return ValidateUserResponse(
+        message="User validated successfully.",
         user=UserResponse(
             username=user.username,
             role=user.role,

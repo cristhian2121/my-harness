@@ -70,6 +70,14 @@ textarea {
   gap: 12px;
 }
 
+.user-actions {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
 .pill-link,
 .button,
 .composer__send {
@@ -92,8 +100,11 @@ textarea {
   background: #ffffff;
 }
 
+.button--ghost {
+  background: transparent;
+}
+
 .user-pill {
-  justify-self: end;
   padding: 8px 14px;
   border-radius: 9999px;
   background: #c1fbd4;
@@ -358,6 +369,10 @@ textarea {
   }
 
   .user-pill {
+    width: fit-content;
+  }
+
+  .user-actions {
     justify-self: start;
   }
 }
@@ -369,6 +384,10 @@ textarea {
   }
 
   .nav-actions {
+    flex-wrap: wrap;
+  }
+
+  .user-actions {
     flex-wrap: wrap;
   }
 

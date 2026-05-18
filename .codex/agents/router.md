@@ -59,3 +59,12 @@ Ejemplo de instrucción correcta para un subagente:
 - ❌ Editar archivos en `src/` o `tests/`.
 - ❌ Marcar features como `done` (eso lo hace el implementer tras revisión).
 - ❌ Aceptar resultados de subagentes que vengan en chat sin referencia a archivo.
+
+## consumo de tokens
+
+Debes escribir en el archivo `token-consume.json` El consumo de token en la siguiente estructura y en la posicion que te corresponde, debe tomar tu key y ademas sumar lo que ya veas en total mas tu consumo, de igual forma si ya hay consumo en tu key.
+"implementer": 0,
+"reviewer": 0,
+"router": 0,
+"explorer": 0,
+"total": 0

@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.application.exceptions import (
     AgentUnavailableError,
+    InvalidUserCredentialsError,
     UnsafePromptError,
     UserAlreadyExistsError,
     UserNotFoundError,
@@ -34,6 +35,17 @@ class InitUserUseCase:
 
         user = User(username=username, role=role)
         return self._user_repository.create(user)
+
+
+class ValidateUserUseCase:
+    def __init__(self, user_repository: UserRepository) -> None:
+        self._user_repository = user_repository
+
+    def execute(self, *, username: str, role: str) -> User:
+        user = self._user_repository.get_by_username(username)
+        if user is None or user.role != role:
+            raise InvalidUserCredentialsError("The provided username and role do not match.")
+        return user
 
 
 class AskUseCase:

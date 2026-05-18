@@ -18,6 +18,26 @@ def test_init_user_rejects_duplicate_username(client):
     assert "already exists" in response.json()["detail"]
 
 
+def test_validate_user_accepts_existing_username_and_role(client):
+    client.post("/init_user", json={"username": "ana", "role": "viewer"})
+
+    response = client.post("/validate_user", json={"username": "ana", "role": "viewer"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["user"]["username"] == "ana"
+    assert payload["user"]["role"] == "viewer"
+
+
+def test_validate_user_rejects_wrong_role(client):
+    client.post("/init_user", json={"username": "ana", "role": "viewer"})
+
+    response = client.post("/validate_user", json={"username": "ana", "role": "admin"})
+
+    assert response.status_code == 404
+    assert "do not match" in response.json()["detail"]
+
+
 def test_ask_requires_existing_user(client):
     response = client.post("/ask", json={"username": "ghost", "message": "hola"})
 

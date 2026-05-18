@@ -1,0 +1,16 @@
+{
+  "back": {
+    "implementer": 0,
+    "reviewer": 0,
+    "router": 1,
+    "explorer": 2,
+    "total": 3
+  },
+  "front": {
+    "implementer": 0,
+    "reviewer": 0,
+    "router": 1,
+    "explorer": 0,
+    "total": 1
+  }
+}

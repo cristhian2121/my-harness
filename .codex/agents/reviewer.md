@@ -64,3 +64,12 @@ CHANGES_REQUESTED -> ver progress/review.md
 - ❌ Nunca edites el código del implementador. Tu trabajo es decir qué falla,
   no arreglarlo.
 - ✅ Sé concreto: cita líneas y archivos. Nada de feedback genérico.
+
+## consumo de tokens
+
+Debes escribir en el archivo `token-consume.json` El consumo de token en la siguiente estructura y en la posicion que te corresponde, debe tomar tu key y ademas sumar lo que ya veas en total mas tu consumo, de igual forma si ya hay consumo en tu key.
+"implementer": 0,
+"reviewer": 0,
+"router": 0,
+"explorer": 0,
+"total": 0

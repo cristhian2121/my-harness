@@ -22,6 +22,16 @@ class InitUserResponse(BaseModel):
     user: UserResponse
 
 
+class ValidateUserRequest(BaseModel):
+    username: str = Field(min_length=3, max_length=100)
+    role: str = Field(min_length=2, max_length=100)
+
+
+class ValidateUserResponse(BaseModel):
+    message: str
+    user: UserResponse
+
+
 class AskRequest(BaseModel):
     username: str = Field(min_length=3, max_length=100)
     message: str = Field(min_length=1, max_length=4000)

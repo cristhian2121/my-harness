@@ -50,3 +50,12 @@ blocked -> ver progress/current.md
 ```
 
 Nunca devuelvas el diff completo en chat. El líder lo leerá del disco si lo necesita.
+
+## consumo de tokens
+
+Debes escribir en el archivo `token-consume.json` El consumo de token en la siguiente estructura y en la posicion que te corresponde, debe tomar tu key y ademas sumar lo que ya veas en total mas tu consumo, de igual forma si ya hay consumo en tu key.
+"implementer": 0,
+"reviewer": 0,
+"router": 0,
+"explorer": 0,
+"total": 0
