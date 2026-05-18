@@ -1,0 +1,22 @@
+# Review: vector_documents_fix
+
+## Findings
+
+1. Media - El hallazgo de prompt injection documental no quedó completamente resuelto. En [back/app/application/use_cases.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/application/use_cases.py:469) el contexto recuperado ahora se serializa como JSON y en [back/app/application/use_cases.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/application/use_cases.py:483) se redaccionan algunos patrones, pero el contenido documental sigue entrando al mismo prompt del LLM y la mitigación depende de instrucciones textuales y regex. Eso corrige el subproblema previo de concatenar `source.text` crudo, pero no cierra el riesgo que la revisión anterior marcó como “no un aislamiento real del contenido no confiable”. La nueva prueba [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:447) solo verifica una frase concreta redactada; no demuestra aislamiento robusto frente a variantes adversariales.
+
+## Resolved
+
+- Alta - El problema de retrieval perdido tras restart sí quedó resuelto. `LocalQdrantVectorStore.search()` rehidrata la colección persistida antes de consultar en [back/app/infrastructure/documents.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/infrastructure/documents.py:313), [back/app/infrastructure/documents.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/infrastructure/documents.py:384) y [back/app/infrastructure/documents.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/infrastructure/documents.py:394). Además, el cierre del vector store quedó conectado al lifespan en [back/app/main.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/main.py:17) y [back/app/core/container.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/core/container.py:41). La cobertura específica existe en [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:419).
+
+- Alta - El estado inconsistente SQLite/vector store también quedó corregido para el riesgo reportado. La ingesta mantiene `uploaded` mientras persiste chunks y metadata, recién marca `indexed` después de `index_chunks()`, y en fallo preserva metadata usando `document_with_metadata` en [back/app/application/use_cases.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/application/use_cases.py:217), [back/app/application/use_cases.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/application/use_cases.py:237), [back/app/application/use_cases.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/application/use_cases.py:244) y [back/app/application/use_cases.py](/Users/roshi/Dev/playGround/python_interviewI/back/app/application/use_cases.py:266). La cobertura relevante está en [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:498).
+
+- Media - La cobertura backend nueva sí es suficiente para los huecos concretos del hallazgo 4, salvo que no cambia la conclusión del riesgo de prompt injection. Quedaron pruebas para `.pdf`, rechazo explícito de `.xls`, formato no soportado, aislamiento por usuario en `POST /documents/ask`, retrieval tras restart, sanitización básica del contenido documental, fallo de parser, fallo de vector store preservando metadata, y no contaminación de `POST /ask` / `GET /history/{username}` en [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:273), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:295), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:308), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:397), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:419), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:447), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:476), [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:498) y [back/tests/test_api.py](/Users/roshi/Dev/playGround/python_interviewI/back/tests/test_api.py:536).
+
+## Verification
+
+- `uv run --directory back pytest` -> `29 passed`
+
+## Conclusion
+
+- Veredicto: 3 de 4 hallazgos quedaron resueltos.
+- El hallazgo restante de prompt injection documental quedó mitigado, pero no cerrado.

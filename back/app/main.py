@@ -17,7 +17,10 @@ def create_app(container: AppContainer | None = None, settings: Settings | None 
     async def lifespan(app: FastAPI):
         resolved_container.create_schema()
         app.state.container = resolved_container
-        yield
+        try:
+            yield
+        finally:
+            resolved_container.close()
 
     app = FastAPI(
         title=resolved_container.settings.app_name,

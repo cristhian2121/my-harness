@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     )
     adk_app_name: str = "pepe_grillo"
     log_level: str = "info"
+    document_storage_dir: str = "./data/documents"
+    vector_store_dir: str = "./data/vector_store"
+    embedding_dimensions: int = 128
 
     model_config = SettingsConfigDict(
         env_file=".env",

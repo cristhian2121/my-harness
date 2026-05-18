@@ -1,14 +1,27 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from app.core.config import Settings, get_settings
-from app.domain.ports import ChatAgentPort
+from app.domain.ports import (
+    ChatAgentPort,
+    DocumentParserPort,
+    DocumentStoragePort,
+    EmbeddingPort,
+    VectorStorePort,
+)
 from app.infrastructure.agent import AdkChatAgent, FallbackChatAgent
 from app.infrastructure.db.models import Base
+from app.infrastructure.documents import (
+    LocalDocumentParser,
+    LocalDocumentStorage,
+    LocalHashEmbeddingService,
+    LocalQdrantVectorStore,
+)
 from app.infrastructure.security import PromptSecurityFilter
 
 
@@ -19,9 +32,19 @@ class AppContainer:
     session_factory: sessionmaker[Session]
     chat_agent: ChatAgentPort
     security_filter: PromptSecurityFilter
+    document_storage: DocumentStoragePort
+    document_parser: DocumentParserPort
+    embedding_service: EmbeddingPort
+    vector_store: VectorStorePort
 
     def create_schema(self) -> None:
         Base.metadata.create_all(self.engine)
+
+    def close(self) -> None:
+        close_vector_store = getattr(self.vector_store, "close", None)
+        if callable(close_vector_store):
+            close_vector_store()
+        self.engine.dispose()
 
 
 def build_container(
@@ -49,6 +72,12 @@ def build_container(
         if resolved_settings.google_api_key
         else FallbackChatAgent("GOOGLE_API_KEY is not configured.")
     )
+    document_storage = LocalDocumentStorage(Path(resolved_settings.document_storage_dir))
+    document_parser = LocalDocumentParser()
+    embedding_service = LocalHashEmbeddingService(resolved_settings.embedding_dimensions)
+    vector_store = LocalQdrantVectorStore(
+        root_directory=Path(resolved_settings.vector_store_dir),
+    )
 
     return AppContainer(
         settings=resolved_settings,
@@ -56,4 +85,8 @@ def build_container(
         session_factory=session_factory,
         chat_agent=resolved_chat_agent,
         security_filter=PromptSecurityFilter(),
+        document_storage=document_storage,
+        document_parser=document_parser,
+        embedding_service=embedding_service,
+        vector_store=vector_store,
     )

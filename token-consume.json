@@ -1,10 +1,10 @@
 {
   "back": {
-    "implementer": 0,
-    "reviewer": 0,
-    "router": 1,
-    "explorer": 2,
-    "total": 3
+    "implementer": 2,
+    "reviewer": 2,
+    "router": 4,
+    "explorer": 5,
+    "total": 13
   },
   "front": {
     "implementer": 0,
